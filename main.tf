@@ -1,11 +1,11 @@
 provider "vault" {
   # Address from environment variable VAULT_ADDR
-  auth_login_jwt {
-    namespace = data.environment_variables.all.items["VAULT_NAMESPACE"]
-    mount     = var.vault_auth_login_jwt_mount
-    role      = var.vault_auth_login_jwt_role
-    jwt       = data.environment_variables.all.items["TFC_WORKLOAD_IDENTITY_TOKEN"]
-  }
+  # auth_login_jwt {
+  #   namespace = data.environment_variables.all.items["VAULT_NAMESPACE"]
+  #   mount     = var.vault_auth_login_jwt_mount
+  #   role      = var.vault_auth_login_jwt_role
+  #   jwt       = data.environment_variables.all.items["TFC_WORKLOAD_IDENTITY_TOKEN"]
+  # }
 }
 
 data "vault_generic_secret" "taco" {
