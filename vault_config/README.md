@@ -1,38 +1,22 @@
-# Configure the Vault Server
+# Bootstrapping trust between a TFC workspace and Vault
 
-This directory contains Terraform code for configuring a Vault server to support OIDC authentication from Terraform Cloud workload identity JWT.
+This directory contains example code for setting up a Terraform Cloud workspace whose runs will be automatically authenticated to Vault using Workload Identity.
 
-## Prerequisites
+The basic building blocks in `vault.tf` will enable the `jwt` auth backend in Vault and create a role that is bound to a particular Terraform Cloud workspace.
 
-You'll need the following to complete the configuration:
+The building blocks in `tfc-workspace.tf` will create that Terraform Cloud workspace and set all the configuration variables needed in order to allow runs to authenticate to Vault.
 
-* A HashiCorp Vault instance with a public interface (I used HCP Vault)
-* A token for the Vault server, or you can update the provider configuration to use an alternate authentication method
+## How to use
 
-## What the Code Does
+You'll need the Terraform CLI installed, and you'll need to set the following environment variables in your local shell:
 
-The code in this directory will do the following:
+1. `VAULT_TOKEN`: the Vault token that you'll use to bootstrap your trust configuration in Vault. It will need the ability to enable auth backends and create roles and policies.
+1. `VAULT_NAMESPACE` (optional): only set this if you're not using the default Vault namespace.
+1. `TFE_TOKEN`: a Terraform Cloud user token with permission to create workspaces within your organization.
 
-* Create a Vault policy for the TFC workspace with permissions to manage child tokens and read a secret
-* Create a JWT auth method called `tfc` pointing to the TFC URL (This would need to be updated if you're using TFE)
-* Create a role called `tfc-workspace-oidc` using the JWT method and the policy created earlier
-* Enable a KVv2 secrets engine at the path `tacos-tfc` with the secret `sauce_recipe`
+Copy `terraform.tfvars.example` to `terraform.tfvars` and customize the required variables. You can also set values for any other variables you'd like to customize beyond the default.
 
-## Deploying the Configuration
+Run `terraform plan` to verify your setup, and then run `terraform apply`.
 
-These are Terraform and environment variable values that you should set:
-
-* `VAULT_TOKEN` - Environment variable with the token to be used with the Vault Server with permissions to create an authentication method, create an access policy, mount a k/v secrets engine, and write a secret to that engine
-* `vault_server_url` = Terraform variable to set the Vault server URL
-* `vault_namespace` = Terraform variable to set the Vault namespace (if using Vault Enterprise or HCP Vault)
-* `tfc_workspace` = The TFC workspace that will access the secret
-* `tfc_organization` = The TFC organization containing the workspace
-
-Once you have those values set, you can deploy the configuration with the following commands:
-
-```bash
-terraform init
-terraform apply -auto-approve
-```
-
-The next step is to configure your TFC workspace. Use the directions found in the parent directory.
+Congratulations! You now have a Terraform Cloud workspace where runs will automatically authenticate to the given Vault instance, allowing you to use
+the Vault Terraform provider to manage and retrieve secrets via Terraform.
